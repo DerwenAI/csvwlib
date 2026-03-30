@@ -82,7 +82,7 @@ class ToRDFConverter:
                     self.graph.add((row_node, CSVW.describes, subject))
             else:
                 print(f"term {virtual_column['propertyUrl']} not in namespaces")
-S
+
     def _add_file_metadata(self, metadata, node):
         language = JSONLDUtils.language(self.metadata.get('@context',[]))
         for key, value in metadata.items():

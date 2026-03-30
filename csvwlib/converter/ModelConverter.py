@@ -24,7 +24,7 @@ class ModelConverter:
         self.csvs = None
         self.values_valiator = None
         self.metadata_url = metadata_url
-        self.start_url = csv_url if csv_url is not None else metadata_url
+        self.start_url = csv_url if csv_url is not None else (metadata_url if not isinstance(metadata_url,dict) else metadata_url.get('url'))
         self.metadata = None
         self.atdm = {'@type': '@AnnotatedTableGroup'}
         self.mode = CONST_STANDARD_MODE
@@ -34,6 +34,8 @@ class ModelConverter:
         metadata_validator = MetadataValidator(self.start_url)
         self.mode = mode
         self.metadata = MetadataLocator.find_and_get(self.csv_url, self.metadata_url)
+        if self.metadata_url and (isinstance(self.metadata_url,dict) or not self.metadata_url.startswith('http')):
+           self.metadata_url = "http://example.com/metadata" 
         self._normalize_metadata_base_url()
         self._normalize_metadata_csv_url()
         metadata_validator.validate_metadata(self.metadata)
@@ -75,14 +77,17 @@ class ModelConverter:
     def _normalize_metadata_base_url(self):
         if self.metadata is None:
             return
-        for context_entry in self.metadata.get('@context',[]):
-            if type(context_entry) is dict and '@base' in context_entry:
-                original_url = self.metadata['url']
-                if original_url.startswith('http'):
-                    directory, file_name = original_url.rsplit('/', 1)
-                    self.metadata['url'] = directory + '/' + context_entry['@base'] + file_name
-                else:
-                    self.metadata['url'] = context_entry['@base'] + self.metadata['url']
+        if isinstance(self.metadata,dict):
+            for context_entry in self.metadata.get('@context',[]):
+                if type(context_entry) is dict and '@base' in context_entry:
+                    original_url = self.metadata["url"]
+                    if original_url.startswith('http'):
+                        directory, file_name = original_url.rsplit('/', 1)
+                        self.metadata['url'] = directory + '/' + context_entry['@base'] + file_name
+                    else:
+                        self.metadata['url'] = context_entry['@base'] + self.metadata['url']
+        else:
+            print(f"Error: not dict, {self.metadata}")
 
     def _normalize_metadata_csv_url(self):
         """ Expands 'url' properties if necessary """
@@ -108,7 +113,7 @@ class ModelConverter:
                                      CSVUtils.parse_csv_from_url_to_list(table['url'], self._delimiter(table)),
                                      self.metadata['tables']))
             else:
-                self.csvs = [CSVUtils.parse_csv_from_url_to_list(self.metadata['url'], self._delimiter(self.metadata))]
+                self.csvs = [CSVUtils.parse_csv_from_url_to_list(self.metadata.get('url'), self._delimiter(self.metadata))]
 
     @staticmethod
     def _delimiter(metadata):

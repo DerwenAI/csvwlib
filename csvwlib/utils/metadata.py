@@ -75,22 +75,26 @@ class MetadataValidator:
     def __init__(self, start_url):
         MetadataValidator.instance = self
         self.metadata = {}
-        self.start_url = start_url
+        if isinstance(start_url,dict):
+            if 'url' in start_url.keys():
+                self.start_url = start_url['url']
+        else:
+            self.start_url = start_url
         self.warnings = []
         self.table = {}
 
     def validate_metadata(self, metadata):
-        if metadata is None:
+        if metadata is None or not isinstance(metadata, dict):
             return
         self.metadata = metadata
-        if 'tableSchema' in metadata:
+        if 'tableSchema' in metadata.keys():
             tables = [metadata]
         else:
             tables = metadata['tables']
 
         for table in tables:
             self.table = table
-            if 'tables' in metadata:
+            if 'tables' in metadata.keys():
                 self.check_member_property('tableGroup', metadata)
             else:
                 self.check_member_property('table', metadata)
@@ -101,6 +105,8 @@ class MetadataValidator:
             self.check_titles(table)
 
     def check_csv_reference(self, table, metadata):
+        if isinstance(self.start_url,dict):
+            return
         if not self.start_url.endswith('.csv'):
             return
         if table['url'] != self.start_url:
