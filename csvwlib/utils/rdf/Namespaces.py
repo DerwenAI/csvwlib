@@ -25,6 +25,7 @@ class Namespaces:
             'org': Namespace('http://www.w3.org/ns/org#'),
             'owl': Namespace('http://www.w3.org/2002/07/owl#'),
             'prov': Namespace('http://www.w3.org/ns/prov#'),
+            'qudt': Namespace('http://qudt.org/1.1/schema/qudt#'),
             'qb': Namespace('http://purl.org/linked-data/cube#'),
             'rdf': Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
             'rdfa': Namespace('http://www.w3.org/ns/rdfa#'),
