@@ -5,7 +5,7 @@ class TypeConverter:
 
     @staticmethod
     def convert_if_necessary(value, column_metadata):
-        if 'datatype' not in column_metadata:
+        if 'datatype' not in column_metadata or not isinstance(column_metadata['datatype'], dict):
             return value
 
         return TypeConverter.convert(value, column_metadata['datatype'])
